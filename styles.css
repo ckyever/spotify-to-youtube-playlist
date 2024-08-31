@@ -1,4 +1,22 @@
-* {
+html {
+    background-color: #2e2e2e;
+    color: #ffffff;
+    font-size: 1.2rem;
+}
+
+html, body {
     margin: 0;
-    padding: 0;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+#spotify-playlist-url {
+    width: 36rem;
 }
