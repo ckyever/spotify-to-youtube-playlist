@@ -1,20 +1,26 @@
-const clientId = "123";
-const clientSecret = "abc";
-const requestBody = `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
+const getToken = async () => {
+    const tokenUrl = "https://accounts.spotify.com/api/token";
+    const clientId = "123";
+    const clientSecret = "abc";
+    const requestBody = `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
 
-const url = "https://accounts.spotify.com/api/token";
-fetch(url, {
-    method: 'POST',
-    body: requestBody,
-    headers: new Headers({
-        'Content-Type': 'application/x-www-form-urlencoded'
-    })
-})
-.then(response => response.json())
-.then(json => {
-    console.log(json.access_token);
-    getArtistData(json.access_token);
-})
+    try {
+        const response = await fetch(tokenUrl, {
+            method: 'POST',
+            body: requestBody,
+            headers: new Headers({
+                'Content-Type': 'application/x-www-form-urlencoded'
+            })
+        });
+        const data = await response.json();
+        const token = await data.access_token;
+        console.log("Token: ", token);
+    } catch (error) {
+        console.log("Error occured: ", error);
+    }
+}
+
+getToken();
 
 const getArtistData = token => {
     const url = "https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb";
