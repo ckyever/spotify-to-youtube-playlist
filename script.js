@@ -16,7 +16,7 @@ fetch(url, {
     getArtistData(json.access_token);
 })
 
-function getArtistData(token) {
+const getArtistData = token => {
     const url = "https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb";
     fetch(url, {
         method: 'GET',
@@ -31,7 +31,7 @@ function getArtistData(token) {
 const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
-function convert() {
+const convert = () => {
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     console.log(spotifyUrl);
 }
