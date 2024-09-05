@@ -13,8 +13,8 @@ const getToken = async () => {
             })
         });
         const data = await response.json();
-        const token = await data.access_token;
-        console.log("Token: ", token);
+        const {access_token} = await data;
+        console.log("Token: ", access_token);
     } catch (error) {
         console.log("Error occured: ", error);
     }
