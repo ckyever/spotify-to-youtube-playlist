@@ -15,14 +15,14 @@ const getToken = async () => {
         const data = await response.json();
         const {access_token} = await data;
         console.log("Token: ", access_token);
+        return access_token;
     } catch (error) {
         console.log("Error occured: ", error);
+        return null;
     }
 }
 
-getToken();
-
-const getArtistData = token => {
+const getArtistData = async token => {
     const url = "https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb";
     fetch(url, {
         method: 'GET',
@@ -31,15 +31,17 @@ const getArtistData = token => {
         })
     })
     .then(response => response.json)
-    .then(json => console.log(JSON.stringify(json)))
+    .then(json => console.log("Artist JSON", JSON.stringify(json)))
 }
 
 const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
-const convert = () => {
+const convert = async () => {
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     console.log(spotifyUrl);
+    const access_token = await getToken(); 
+    await getArtistData(access_token);
 }
 
 convertButton.addEventListener("click", convert);
