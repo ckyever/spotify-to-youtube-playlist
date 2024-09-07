@@ -1,7 +1,8 @@
-const getToken = async () => {
+// Spotify API
+const getSpotifyToken = async () => {
     const url = "https://accounts.spotify.com/api/token";
-    const clientId = "123";
-    const clientSecret = "abc";
+    const clientId = "abc";
+    const clientSecret = "123";
     const requestBody = `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
 
     try {
@@ -38,7 +39,7 @@ const getPlaylist = async (token, playlistUrl) => {
         const songTitles = tracks.map((item) => {
             const mainArtist = item.track.artists[0].name;
             const trackItem = item.track.name;
-            return `${mainArtist} - ${trackItem}`
+            return `${mainArtist} - ${trackItem}`;
         });
         return songTitles;
     } catch (error) {
@@ -47,13 +48,45 @@ const getPlaylist = async (token, playlistUrl) => {
     }
 }
 
+// Youtube API
+let searchQueries = [];
+let videoIds = [];
+
+const youtubeSearch = () => {
+    const apiKey = "zzz";
+
+    searchQueries.forEach(query => {
+        gapi.client.init({
+            'part': ['snippet'],
+            'apiKey': apiKey,
+            'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
+        }).then(function() {
+            return gapi.client.youtube.search.list({
+                q: query,
+                maxResults: 1
+            });
+        }).then(function(response) {
+            videoIds.push(response.result.items[0].id.videoId);
+        }, function(error) {
+            console.log(error);
+        });
+    });
+};
+
+
+// Convert Process
 const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
-    const access_token = await getToken(); 
-    await getPlaylist(access_token, spotifyUrl);
+    const access_token = await getSpotifyToken(); 
+    const songTitles = await getPlaylist(access_token, spotifyUrl);
+    searchQueries = songTitles;
+    gapi.load('client', youtubeSearch);
+    console.log(videoIds);
+    // TODO: Get an array of Youtube urls by using songTitles to query
+    // TODO: Create a playlist using these urls
 }
 
 convertButton.addEventListener("click", convert);
