@@ -1,9 +1,11 @@
+const spotifyClientId = "123";
+const spotifyClientSecret = "123";
+const youtubeApiKey = "123";
+
 // Spotify API
 const getSpotifyToken = async () => {
     const url = "https://accounts.spotify.com/api/token";
-    const clientId = "abc";
-    const clientSecret = "123";
-    const requestBody = `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
+    const requestBody = `grant_type=client_credentials&client_id=${spotifyClientId}&client_secret=${spotifyClientSecret}`;
 
     try {
         const response = await fetch(url, {
@@ -53,12 +55,10 @@ let searchQueries = [];
 let videoIds = [];
 
 const youtubeSearch = () => {
-    const apiKey = "zzz";
-
     searchQueries.forEach(query => {
         gapi.client.init({
             'part': ['snippet'],
-            'apiKey': apiKey,
+            'youtubeApiKey': apiKey,
             'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
         }).then(function() {
             return gapi.client.youtube.search.list({
@@ -71,8 +71,30 @@ const youtubeSearch = () => {
             console.log(error);
         });
     });
-};
+}
 
+// TODO: Need to do OAuth for this
+const createYoutubePlaylist = () => {
+    gapi.client.init({
+        'part': ['snippet'],
+        'apiKey': apiKey,
+        'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
+    }).then(function() {
+        return gapi.client.youtube.playlists.insert({
+            snippet: {
+                title: "Playlist from API",
+                description: "This playlist was created via the API"
+            },
+            status: {
+                privacyStatus: "private"
+            }
+        });
+    }).then(function(response) {
+        console.log("Playlist ID", response.result.playlists.id);
+    }, function(error) {
+        console.log(error);
+    });
+}
 
 // Convert Process
 const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
@@ -83,10 +105,13 @@ const convert = async () => {
     const access_token = await getSpotifyToken(); 
     const songTitles = await getPlaylist(access_token, spotifyUrl);
     searchQueries = songTitles;
-    gapi.load('client', youtubeSearch);
-    console.log(videoIds);
+
     // TODO: Get an array of Youtube urls by using songTitles to query
+    //gapi.load('client', youtubeSearch);
+    //console.log(videoIds);
+
     // TODO: Create a playlist using these urls
+    gapi.load('client', createYoutubePlaylist);
 }
 
 convertButton.addEventListener("click", convert);
