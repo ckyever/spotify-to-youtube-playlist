@@ -1,6 +1,8 @@
+// API Credentials
 const spotifyClientId = "123";
 const spotifyClientSecret = "123";
 const youtubeApiKey = "123";
+const youtubeClientId = "123";
 
 // Spotify API
 const getSpotifyToken = async () => {
@@ -54,6 +56,24 @@ const getPlaylist = async (token, playlistUrl) => {
 let searchQueries = [];
 let videoIds = [];
 
+const googleIdClient = google.accounts.oauth2.initCodeClient({
+  client_id: youtubeClientId,
+  scope: 'https://www.googleapis.com/auth/youtube',
+  ux_mode: 'popup',
+  callback: (response) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', "http://localhost:5500", true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    // Set custom header for CRSF
+    xhr.setRequestHeader('X-Requested-With', 'XmlHttpRequest');
+    xhr.onload = function() {
+      console.log('Auth code response: ' + xhr.responseText);
+    };
+    xhr.send('code=' + response.code);
+    console.log('Auth code: ', response.code);
+  },
+});
+
 const youtubeSearch = () => {
     searchQueries.forEach(query => {
         gapi.client.init({
@@ -101,17 +121,17 @@ const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
-    const spotifyUrl = document.getElementById('spotify-playlist-url').value;
-    const access_token = await getSpotifyToken(); 
-    const songTitles = await getPlaylist(access_token, spotifyUrl);
-    searchQueries = songTitles;
+    googleIdClient.requestCode();
+    //const spotifyUrl = document.getElementById('spotify-playlist-url').value;
+    //const access_token = await getSpotifyToken(); 
+    //const songTitles = await getPlaylist(access_token, spotifyUrl);
+    //searchQueries = songTitles;
 
-    // TODO: Get an array of Youtube urls by using songTitles to query
     //gapi.load('client', youtubeSearch);
     //console.log(videoIds);
 
     // TODO: Create a playlist using these urls
-    gapi.load('client', createYoutubePlaylist);
+    //gapi.load('client', createYoutubePlaylist);
 }
 
 convertButton.addEventListener("click", convert);
