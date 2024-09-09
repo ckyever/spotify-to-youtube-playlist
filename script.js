@@ -56,21 +56,14 @@ const getPlaylist = async (token, playlistUrl) => {
 let searchQueries = [];
 let videoIds = [];
 
-const googleIdClient = google.accounts.oauth2.initCodeClient({
+const googleIdClient = google.accounts.oauth2.initTokenClient({
   client_id: youtubeClientId,
   scope: 'https://www.googleapis.com/auth/youtube',
   ux_mode: 'popup',
   callback: (response) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', "http://localhost:5500", true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    // Set custom header for CRSF
-    xhr.setRequestHeader('X-Requested-With', 'XmlHttpRequest');
-    xhr.onload = function() {
-      console.log('Auth code response: ' + xhr.responseText);
-    };
-    xhr.send('code=' + response.code);
-    console.log('Auth code: ', response.code);
+    if (response && response.access_token) {
+       console.log("Access Token", response.access_token); 
+    }
   },
 });
 
@@ -121,7 +114,7 @@ const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
-    googleIdClient.requestCode();
+    googleIdClient.requestAccessToken();
     //const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     //const access_token = await getSpotifyToken(); 
     //const songTitles = await getPlaylist(access_token, spotifyUrl);
