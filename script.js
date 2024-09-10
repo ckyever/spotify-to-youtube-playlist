@@ -62,7 +62,12 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
   ux_mode: 'popup',
   callback: (response) => {
     if (response && response.access_token) {
-       console.log("Access Token", response.access_token); 
+        if (google.accounts.oauth2.hasGrantedAllScopes(response,
+            'https://www.googleapis.com/auth/youtube',
+        )) {
+            console.log("Youtube access has been granted");
+            console.log("Access Token", response.access_token); 
+        }
     }
   },
 });
