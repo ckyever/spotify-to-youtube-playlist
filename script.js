@@ -65,6 +65,9 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
         if (google.accounts.oauth2.hasGrantedAllScopes(response,
             'https://www.googleapis.com/auth/youtube',
         )) {
+            console.log('ckytodo1');
+            gapi.load('client', youTubeApi);
+            console.log('ckytodo2');
             console.log("Youtube access has been granted");
             console.log("Access Token", response.access_token); 
         }
@@ -72,11 +75,44 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
   },
 });
 
+const youTubeApi = () => {
+    try {
+        gapi.client.init({
+            'apiKey': youtubeApiKey,
+            'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3'],
+            'client_id': youtubeClientId,
+            'scope': 'https://www.googleapis.com/auth/youtube'
+        }).then(() => {
+            gapi.client.load('youtube', 'v3', createYoutubePlaylist);
+        })
+    } catch (error) {
+        console.log("Error: ", error);
+    }
+}
+
+// TODO: Need to do OAuth for this
+const createYoutubePlaylist = () => {
+    console.log('ckytodo3');
+    gapi.client.youtube.playlists.insert({
+        snippet: {
+            title: "Playlist from API",
+            description: "This playlist was created via the API"
+        },
+        status: {
+            privacyStatus: "private"
+        }
+    }).then(function(response) {
+        console.log("Playlist ID", response.result.playlists.id);
+    }, function(error) {
+        console.log(error);
+    });
+}
+
 const youtubeSearch = () => {
     searchQueries.forEach(query => {
         gapi.client.init({
             'part': ['snippet'],
-            'youtubeApiKey': apiKey,
+            'youtubeApiKey': youtubeApiKey,
             'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
         }).then(function() {
             return gapi.client.youtube.search.list({
@@ -88,29 +124,6 @@ const youtubeSearch = () => {
         }, function(error) {
             console.log(error);
         });
-    });
-}
-
-// TODO: Need to do OAuth for this
-const createYoutubePlaylist = () => {
-    gapi.client.init({
-        'part': ['snippet'],
-        'apiKey': apiKey,
-        'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
-    }).then(function() {
-        return gapi.client.youtube.playlists.insert({
-            snippet: {
-                title: "Playlist from API",
-                description: "This playlist was created via the API"
-            },
-            status: {
-                privacyStatus: "private"
-            }
-        });
-    }).then(function(response) {
-        console.log("Playlist ID", response.result.playlists.id);
-    }, function(error) {
-        console.log(error);
     });
 }
 
