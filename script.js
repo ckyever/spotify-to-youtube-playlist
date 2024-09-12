@@ -26,7 +26,7 @@ const getSpotifyToken = async () => {
     }
 }
 
-const getPlaylist = async (token, playlistUrl) => {
+const getSpotifyPlaylist = async (token, playlistUrl) => {
     playlistUrl = playlistUrl.slice(-1) === '/' ? playlistUrl.slice(0, -1) : playlistUrl;
     const playlistId = playlistUrl.substring(playlistUrl.lastIndexOf('/') + 1);
 
@@ -56,63 +56,11 @@ const getPlaylist = async (token, playlistUrl) => {
 let searchQueries = [];
 let videoIds = [];
 
-const googleIdClient = google.accounts.oauth2.initTokenClient({
-  client_id: youtubeClientId,
-  scope: 'https://www.googleapis.com/auth/youtube',
-  ux_mode: 'popup',
-  callback: (response) => {
-    if (response && response.access_token) {
-        if (google.accounts.oauth2.hasGrantedAllScopes(response,
-            'https://www.googleapis.com/auth/youtube',
-        )) {
-            console.log('ckytodo1');
-            gapi.load('client', youTubeApi);
-            console.log('ckytodo2');
-            console.log("Youtube access has been granted");
-            console.log("Access Token", response.access_token); 
-        }
-    }
-  },
-});
-
-const youTubeApi = () => {
-    try {
-        gapi.client.init({
-            'apiKey': youtubeApiKey,
-            'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3'],
-            'client_id': youtubeClientId,
-            'scope': 'https://www.googleapis.com/auth/youtube'
-        }).then(() => {
-            gapi.client.load('youtube', 'v3', createYoutubePlaylist);
-        })
-    } catch (error) {
-        console.log("Error: ", error);
-    }
-}
-
-// TODO: Need to do OAuth for this
-const createYoutubePlaylist = () => {
-    console.log('ckytodo3');
-    gapi.client.youtube.playlists.insert({
-        snippet: {
-            title: "Playlist from API",
-            description: "This playlist was created via the API"
-        },
-        status: {
-            privacyStatus: "private"
-        }
-    }).then(function(response) {
-        console.log("Playlist ID", response.result.playlists.id);
-    }, function(error) {
-        console.log(error);
-    });
-}
-
 const youtubeSearch = () => {
     searchQueries.forEach(query => {
         gapi.client.init({
             'part': ['snippet'],
-            'youtubeApiKey': youtubeApiKey,
+            'apiKey': youtubeApiKey,
             'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
         }).then(function() {
             return gapi.client.youtube.search.list({
@@ -127,22 +75,93 @@ const youtubeSearch = () => {
     });
 }
 
+const googleIdClient = google.accounts.oauth2.initTokenClient({
+  client_id: youtubeClientId,
+  scope: 'https://www.googleapis.com/auth/youtube',
+  ux_mode: 'popup',
+  callback: (response) => {
+    if (response && response.access_token) {
+        if (google.accounts.oauth2.hasGrantedAllScopes(response,
+            'https://www.googleapis.com/auth/youtube',
+        )) {
+            console.log("Access Token", response.access_token); 
+            createYoutubePlaylist(response.access_token);
+        }
+    }
+  }
+});
+
+const createYoutubePlaylist = (accessToken) => {
+    const url = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&part=status"
+    const spotifyUrl = document.getElementById('spotify-playlist-url').value;
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            "snippet": {
+                "title": "Spotify to Youtube Playlist",
+                "description": `Converted from Spotify playlist ${spotifyUrl}`,
+                "tags": [
+                    "API Call"
+                ],
+                "defaultLanguage": "en"
+            },
+            "status": {
+                "privacyStatus": "private"
+            }
+        }),
+        headers: new Headers({
+            'Authorization': `Bearer ${accessToken}`
+        })
+    }).then(response => response.json())
+    .then(data => data.id)
+    .then(playlistId => {
+        console.log("Playlist id:", playlistId);
+        videoIds.forEach(videoId => {
+            console.log("Adding video ID:", videoId);
+            addToYoutubePlaylist(accessToken, playlistId, videoId);
+        });
+    }).catch(error => {
+            console.log("Error:", error);
+    });
+}
+
+const addToYoutubePlaylist = (accessToken, youtubePlaylistId, youtubeVideoId) => {
+    const url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet"
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            "snippet": {
+                "playlistId": youtubePlaylistId,
+                "resourceId": {
+                    "kind": "youtube#video",
+                    "videoId": youtubeVideoId
+                }
+            }
+        }),
+        headers: new Headers({
+            'Authorization': `Bearer ${accessToken}`
+        })
+    }).then(response => {
+        if (response) {
+            console.log("Added video:", youtubeVideoId)
+        }
+    }).catch(error => {
+            console.log("Error:", error);
+    });
+}
+
 // Convert Process
 const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
-    googleIdClient.requestAccessToken();
-    //const spotifyUrl = document.getElementById('spotify-playlist-url').value;
-    //const access_token = await getSpotifyToken(); 
-    //const songTitles = await getPlaylist(access_token, spotifyUrl);
-    //searchQueries = songTitles;
-
-    //gapi.load('client', youtubeSearch);
-    //console.log(videoIds);
-
-    // TODO: Create a playlist using these urls
-    //gapi.load('client', createYoutubePlaylist);
+    const spotifyUrl = document.getElementById('spotify-playlist-url').value;
+    const access_token = await getSpotifyToken(); 
+    const songTitles = await getSpotifyPlaylist(access_token, spotifyUrl);
+    searchQueries = songTitles;
+    await gapi.load('client', youtubeSearch);
+    console.log(videoIds);
+    await googleIdClient.requestAccessToken();
 }
 
 convertButton.addEventListener("click", convert);
