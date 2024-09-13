@@ -18,7 +18,7 @@ const getSpotifyToken = async () => {
             })
         });
         const data = await response.json();
-        const {access_token} = await data;
+        const {access_token} = data;
         return access_token;
     } catch (error) {
         console.log(error);
@@ -76,78 +76,87 @@ const youtubeSearch = () => {
 }
 
 const googleIdClient = google.accounts.oauth2.initTokenClient({
-  client_id: youtubeClientId,
-  scope: 'https://www.googleapis.com/auth/youtube',
-  ux_mode: 'popup',
-  callback: (response) => {
-    if (response && response.access_token) {
-        if (google.accounts.oauth2.hasGrantedAllScopes(response,
-            'https://www.googleapis.com/auth/youtube',
-        )) {
-            console.log("Access Token", response.access_token); 
-            createYoutubePlaylist(response.access_token);
+    client_id: youtubeClientId,
+    scope: 'https://www.googleapis.com/auth/youtube',
+    ux_mode: 'popup',
+    callback: (response) => {
+        if (response && response.access_token) {
+            if (google.accounts.oauth2.hasGrantedAllScopes(response,
+                'https://www.googleapis.com/auth/youtube',
+            )) {
+                console.log("Access Token:", response.access_token); 
+                createYoutubePlaylist(response.access_token);
+            }
         }
     }
-  }
 });
 
-const createYoutubePlaylist = (accessToken) => {
+const createYoutubePlaylist = async (accessToken) => {
     const url = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&part=status"
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
-    fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-            "snippet": {
-                "title": "Spotify to Youtube Playlist",
-                "description": `Converted from Spotify playlist ${spotifyUrl}`,
-                "tags": [
-                    "API Call"
-                ],
-                "defaultLanguage": "en"
-            },
-            "status": {
-                "privacyStatus": "private"
-            }
-        }),
-        headers: new Headers({
-            'Authorization': `Bearer ${accessToken}`
-        })
-    }).then(response => response.json())
-    .then(data => data.id)
-    .then(playlistId => {
-        console.log("Playlist id:", playlistId);
-        videoIds.forEach(videoId => {
-            console.log("Adding video ID:", videoId);
-            addToYoutubePlaylist(accessToken, playlistId, videoId);
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({
+                "snippet": {
+                    "title": "Spotify to Youtube Playlist",
+                    "description": `Converted from Spotify playlist ${spotifyUrl}`,
+                    "tags": [
+                        "API Call"
+                    ],
+                    "defaultLanguage": "en"
+                },
+                "status": {
+                    "privacyStatus": "private"
+                }
+            }),
+            headers: new Headers({
+                'Authorization': `Bearer ${accessToken}`
+            })
         });
-    }).catch(error => {
-            console.log("Error:", error);
-    });
+
+        const data = await response.json()
+        const playlistId = data.id;
+        console.log("Playlist ID:", playlistId);
+
+        await addVideoListToYoutubePlaylist(accessToken, playlistId, videoIds);
+    } catch {
+        console.log("Error:", error);
+    }
 }
 
-const addToYoutubePlaylist = (accessToken, youtubePlaylistId, youtubeVideoId) => {
+const addVideoListToYoutubePlaylist = async (accessToken, youtubePlaylistId, videoIds) => {
+
+    for (const videoId of videoIds) {
+        await addToYoutubePlaylist(accessToken, youtubePlaylistId, videoId);
+    }
+
+}
+
+const addToYoutubePlaylist = async (accessToken, youtubePlaylistId, youtubeVideoId) => {
     const url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet"
-    fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-            "snippet": {
-                "playlistId": youtubePlaylistId,
-                "resourceId": {
-                    "kind": "youtube#video",
-                    "videoId": youtubeVideoId
+    try {
+        await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({
+                "snippet": {
+                    "playlistId": youtubePlaylistId,
+                    "resourceId": {
+                        "kind": "youtube#video",
+                        "videoId": youtubeVideoId
+                    }
                 }
-            }
-        }),
-        headers: new Headers({
-            'Authorization': `Bearer ${accessToken}`
-        })
-    }).then(response => {
-        if (response) {
-            console.log("Added video:", youtubeVideoId)
-        }
-    }).catch(error => {
-            console.log("Error:", error);
-    });
+            }),
+            headers: new Headers({
+                'Authorization': `Bearer ${accessToken}`
+            })
+        });
+        // CKYTODO: Video is sometimes not getting added to the playlist
+        console.log("Added this video to the playlist:", youtubeVideoId);
+    } catch {
+        console.log("Error:", error);
+    }
 }
 
 // Convert Process
@@ -159,8 +168,9 @@ const convert = async () => {
     const access_token = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(access_token, spotifyUrl);
     searchQueries = songTitles;
+    console.log("Youtube Search Queries:", searchQueries)
     await gapi.load('client', youtubeSearch);
-    console.log(videoIds);
+    console.log("Video IDs:", videoIds);
     await googleIdClient.requestAccessToken();
 }
 
