@@ -92,6 +92,21 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
     }
 });
 
+const showYoutubePlaylistUrl = (playlistId) => {
+    const youtubePlaylistResult = document.getElementById("youtube-playlist-result");
+    const youtubePlaylistUrl  = document.getElementById("youtube-playlist-url");
+    if (playlistId) {
+        youtubePlaylistResult.style.display = "flex";
+        const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+        youtubePlaylistUrl.setAttribute("href", playlistUrl);
+        youtubePlaylistUrl.innerText = playlistUrl;
+    } else {
+        youtubePlaylistResult.style.display = "none";
+        youtubePlaylistUrl.setAttribute("href", "");
+        youtubePlaylistUrl.innerText = "";
+    }
+}
+
 const createYoutubePlaylist = async (accessToken) => {
     const url = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&part=status"
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
@@ -120,29 +135,29 @@ const createYoutubePlaylist = async (accessToken) => {
         const data = await response.json()
         const playlistId = data.id;
         console.log("Playlist ID:", playlistId);
-
         await addVideoListToYoutubePlaylist(accessToken, playlistId, videoIds);
+        showYoutubePlaylistUrl(playlistId);
     } catch {
         console.log("Error:", error);
     }
 }
 
-const addVideoListToYoutubePlaylist = async (accessToken, youtubePlaylistId, videoIds) => {
+const addVideoListToYoutubePlaylist = async (accessToken, playlistId, videoIds) => {
 
     for (const videoId of videoIds) {
-        await addToYoutubePlaylist(accessToken, youtubePlaylistId, videoId);
+        await addToYoutubePlaylist(accessToken, playlistId, videoId);
     }
 
 }
 
-const addToYoutubePlaylist = async (accessToken, youtubePlaylistId, youtubeVideoId) => {
+const addToYoutubePlaylist = async (accessToken, playlistId, youtubeVideoId) => {
     const url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet"
     try {
         await fetch(url, {
             method: 'POST',
             body: JSON.stringify({
                 "snippet": {
-                    "playlistId": youtubePlaylistId,
+                    "playlistId": playlistId,
                     "resourceId": {
                         "kind": "youtube#video",
                         "videoId": youtubeVideoId
@@ -164,9 +179,10 @@ const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
+    showYoutubePlaylistUrl(null);
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
-    const access_token = await getSpotifyToken(); 
-    const songTitles = await getSpotifyPlaylist(access_token, spotifyUrl);
+    const accessToken = await getSpotifyToken(); 
+    const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
 
     // Ensure the search query contains the exact keywords
     searchQueries = songTitles.map(title => `"${title}" OR "${title} (Official Video)"`);

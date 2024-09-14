@@ -1,6 +1,8 @@
 :root {
     --main-background-color: #2e2e2e;
     --main-text-color: #ffffff;
+    --spotify-color: #1db954;	
+    --youtube-color: #ff0000;
 }
 
 html {
@@ -23,6 +25,30 @@ body {
     gap: 1rem;
 }
 
+.spotify-text {
+    color: var(--spotify-color);
+}
+
+.youtube-text {
+    color: var(--youtube-color);
+}
+
 #spotify-playlist-url {
     width: 36rem;
+}
+
+#youtube-playlist-result {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    border: 0.1rem solid;
+    padding: 1rem;
+}
+
+#youtube-playlist-url {
+    font-size: 0.8rem;
+    color: var(--main-text-color);
+    text-decoration: none;
 }
