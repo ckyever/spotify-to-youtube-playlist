@@ -127,11 +127,7 @@ const createYoutubePlaylist = async (accessToken) => {
             body: JSON.stringify({
                 "snippet": {
                     "title": "Spotify to Youtube Playlist",
-                    "description": `Converted from Spotify playlist ${spotifyUrl}`,
-                    "tags": [
-                        "API Call"
-                    ],
-                    "defaultLanguage": "en"
+                    "description": `Converted from Spotify playlist ${spotifyUrl}`
                 },
                 "status": {
                     "privacyStatus": "private"
