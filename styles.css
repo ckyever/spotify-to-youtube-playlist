@@ -1,6 +1,7 @@
 :root {
     --main-background-color: #2e2e2e;
     --main-text-color: #ffffff;
+    --secondary-text-color: #999191;
     --spotify-color: #1db954;	
     --youtube-color: #ff0000;
 }
@@ -26,15 +27,25 @@ body {
 }
 
 .spotify-text {
+    font-size: 1.6rem;
     color: var(--spotify-color);
 }
 
 .youtube-text {
+    font-size: 1.4rem;
     color: var(--youtube-color);
 }
 
 #spotify-playlist-url {
     width: 36rem;
+    height: 2rem;
+    font-size: 0.8rem;
+}
+
+#convert-button {
+    width: 8rem;
+    height: 2rem;
+    font-size: 1rem;
 }
 
 #youtube-playlist-result {
@@ -51,4 +62,15 @@ body {
     font-size: 0.8rem;
     color: var(--main-text-color);
     text-decoration: none;
+}
+
+#youtube-playlist-url:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.4rem;
+}
+
+#loading-status {
+    display: none;
+    color: var(--secondary-text-color);
+    font-size: 1rem;
 }

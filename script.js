@@ -4,6 +4,15 @@ const spotifyClientSecret = "123";
 const youtubeApiKey = "123";
 const youtubeClientId = "123";
 
+const showLoadingStatus = (isLoading) => {
+    const loadingStatus = document.getElementById("loading-status");
+    if (isLoading) {
+        loadingStatus.style.display = "block";
+    } else {
+        loadingStatus.style.display = "none";
+    }
+}
+
 // Spotify API
 const getSpotifyToken = async () => {
     const url = "https://accounts.spotify.com/api/token";
@@ -95,6 +104,7 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
 const showYoutubePlaylistUrl = (playlistId) => {
     const youtubePlaylistResult = document.getElementById("youtube-playlist-result");
     const youtubePlaylistUrl  = document.getElementById("youtube-playlist-url");
+    showLoadingStatus(false);
     if (playlistId) {
         youtubePlaylistResult.style.display = "flex";
         const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
@@ -180,6 +190,7 @@ const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
     showYoutubePlaylistUrl(null);
+    showLoadingStatus(true);
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     const accessToken = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
