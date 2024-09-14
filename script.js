@@ -4,12 +4,17 @@ const spotifyClientSecret = "123";
 const youtubeApiKey = "123";
 const youtubeClientId = "123";
 
-const showLoadingStatus = (isLoading) => {
-    const loadingStatus = document.getElementById("loading-status");
-    if (isLoading) {
-        loadingStatus.style.display = "block";
+const enableConvertButton = (isEnabled) => {
+    const convertButton = document.getElementById("convert-button");
+    const spotifyPlaylistUrlInput = document.getElementById('spotify-playlist-url');
+    if (isEnabled) {
+        spotifyPlaylistUrlInput.disabled = false;
+        convertButton.disabled = false;
+        convertButton.innerText = "Convert";
     } else {
-        loadingStatus.style.display = "none";
+        spotifyPlaylistUrlInput.disabled = true;
+        convertButton.disabled = true;
+        convertButton.innerText = "Converting";
     }
 }
 
@@ -76,9 +81,10 @@ const youtubeSearch = () => {
                 q: query,
                 maxResults: 1,
                 type: "video",
-                order: "viewCount"
+                order: "relevance"
             });
         }).then(function(response) {
+            // CKYTODO: Handle for 403 quote exceeded
             videoIds.push(response.result.items[0].id.videoId);
         }, function(error) {
             console.log(error);
@@ -104,8 +110,8 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
 const showYoutubePlaylistUrl = (playlistId) => {
     const youtubePlaylistResult = document.getElementById("youtube-playlist-result");
     const youtubePlaylistUrl  = document.getElementById("youtube-playlist-url");
-    showLoadingStatus(false);
     if (playlistId) {
+        enableConvertButton(true);
         youtubePlaylistResult.style.display = "flex";
         const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
         youtubePlaylistUrl.setAttribute("href", playlistUrl);
@@ -137,6 +143,7 @@ const createYoutubePlaylist = async (accessToken) => {
                 'Authorization': `Bearer ${accessToken}`
             })
         });
+        // CKYTODO: Handle for 403 quote exceeded
 
         const data = await response.json()
         const playlistId = data.id;
@@ -149,11 +156,15 @@ const createYoutubePlaylist = async (accessToken) => {
 }
 
 const addVideoListToYoutubePlaylist = async (accessToken, playlistId, videoIds) => {
+    const convertButton = document.getElementById("convert-button");
+    const numberOfVideos = videoIds.length;
+    let i = 0;
 
     for (const videoId of videoIds) {
+        i++;
+        convertButton.innerText = `Converting ${i} of ${numberOfVideos}`;
         await addToYoutubePlaylist(accessToken, playlistId, videoId);
     }
-
 }
 
 const addToYoutubePlaylist = async (accessToken, playlistId, youtubeVideoId) => {
@@ -174,6 +185,7 @@ const addToYoutubePlaylist = async (accessToken, playlistId, youtubeVideoId) => 
                 'Authorization': `Bearer ${accessToken}`
             })
         });
+        // CKYTODO: Handle for 403 quote exceeded
         console.log("Added this video to the playlist:", youtubeVideoId);
     } catch {
         console.log("Error:", error);
@@ -185,14 +197,14 @@ const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
+    enableConvertButton(false);
     showYoutubePlaylistUrl(null);
-    showLoadingStatus(true);
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     const accessToken = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
 
     // Ensure the search query contains the exact keywords
-    searchQueries = songTitles.map(title => `"${title}" OR "${title} (Official Video)"`);
+    searchQueries = songTitles.map(title => `"${title} (Official Video)"`); //CKYTODO: Try without quotes
     console.log("Youtube Search Queries:", searchQueries)
 
     await gapi.load('client', youtubeSearch);

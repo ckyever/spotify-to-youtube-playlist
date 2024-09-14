@@ -1,7 +1,7 @@
 :root {
     --main-background-color: #2e2e2e;
+    --disabled-background-color: #adadad;
     --main-text-color: #ffffff;
-    --secondary-text-color: #999191;
     --spotify-color: #1db954;	
     --youtube-color: #ff0000;
 }
@@ -45,13 +45,20 @@ body {
     border-radius: 2rem;
 }
 
+#spotify-playlist-url:disabled {
+    background-color: var(--disabled-background-color);
+}
+
 #convert-button {
-    width: 8rem;
-    height: 2rem;
+    padding: 0.6rem 1rem;
     font-size: 1rem;
     border-radius: 0.8rem;
     border: none;
     cursor: pointer;
+}
+
+#convert-button:disabled {
+    background-color: var(--disabled-background-color);
 }
 
 #youtube-playlist-result {
@@ -75,10 +82,4 @@ body {
 #youtube-playlist-url:hover {
     text-decoration: underline;
     text-underline-offset: 0.4rem;
-}
-
-#loading-status {
-    display: none;
-    color: var(--secondary-text-color);
-    font-size: 1rem;
 }
