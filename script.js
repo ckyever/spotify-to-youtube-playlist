@@ -65,7 +65,9 @@ const youtubeSearch = () => {
         }).then(function() {
             return gapi.client.youtube.search.list({
                 q: query,
-                maxResults: 1
+                maxResults: 1,
+                type: "video",
+                order: "viewCount"
             });
         }).then(function(response) {
             videoIds.push(response.result.items[0].id.videoId);
@@ -84,7 +86,6 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
             if (google.accounts.oauth2.hasGrantedAllScopes(response,
                 'https://www.googleapis.com/auth/youtube',
             )) {
-                console.log("Access Token:", response.access_token); 
                 createYoutubePlaylist(response.access_token);
             }
         }
@@ -152,7 +153,6 @@ const addToYoutubePlaylist = async (accessToken, youtubePlaylistId, youtubeVideo
                 'Authorization': `Bearer ${accessToken}`
             })
         });
-        // CKYTODO: Video is sometimes not getting added to the playlist
         console.log("Added this video to the playlist:", youtubeVideoId);
     } catch {
         console.log("Error:", error);
@@ -167,10 +167,13 @@ const convert = async () => {
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     const access_token = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(access_token, spotifyUrl);
-    searchQueries = songTitles;
+
+    // Ensure the search query contains the exact keywords
+    searchQueries = songTitles.map(title => `"${title}" OR "${title} (Official Video)"`);
     console.log("Youtube Search Queries:", searchQueries)
+
     await gapi.load('client', youtubeSearch);
-    console.log("Video IDs:", videoIds);
+    console.log("Found Video IDs:", videoIds);
     await googleIdClient.requestAccessToken();
 }
 
