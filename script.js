@@ -107,15 +107,22 @@ const googleIdClient = google.accounts.oauth2.initTokenClient({
     }
 });
 
-const showYoutubePlaylistUrl = (playlistId) => {
+const showYoutubePlaylistUrl = (showUrl, playlistId) => {
     const youtubePlaylistResult = document.getElementById("youtube-playlist-result");
     const youtubePlaylistUrl  = document.getElementById("youtube-playlist-url");
-    if (playlistId) {
+    if (showUrl) {
         enableConvertButton(true);
-        youtubePlaylistResult.style.display = "flex";
-        const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
-        youtubePlaylistUrl.setAttribute("href", playlistUrl);
-        youtubePlaylistUrl.innerText = playlistUrl;
+        if (playlistId) {
+            youtubePlaylistResult.style.display = "flex";
+            const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+            youtubePlaylistUrl.setAttribute("href", playlistUrl);
+            youtubePlaylistUrl.innerText = playlistUrl;
+        } else {
+            youtubePlaylistResult.style.display = "flex";
+            youtubePlaylistUrl.setAttribute("href", "");
+            youtubePlaylistUrl.style = "pointer-events: none";
+            youtubePlaylistUrl.innerText = "Unable to generate the playlist";
+        }
     } else {
         youtubePlaylistResult.style.display = "none";
         youtubePlaylistUrl.setAttribute("href", "");
@@ -149,7 +156,7 @@ const createYoutubePlaylist = async (accessToken) => {
         const playlistId = data.id;
         console.log("Playlist ID:", playlistId);
         await addVideoListToYoutubePlaylist(accessToken, playlistId, videoIds);
-        showYoutubePlaylistUrl(playlistId);
+        showYoutubePlaylistUrl(true, playlistId);
     } catch {
         console.log("Error:", error);
     }
@@ -198,7 +205,7 @@ const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
     enableConvertButton(false);
-    showYoutubePlaylistUrl(null);
+    showYoutubePlaylistUrl(false, null);
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
     const accessToken = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
