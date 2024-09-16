@@ -84,7 +84,6 @@ const youtubeSearch = () => {
                 order: "relevance"
             });
         }).then(function(response) {
-            // CKYTODO: Handle for 403 quote exceeded
             videoIds.push(response.result.items[0].id.videoId);
         }, function(error) {
             console.log(error);
@@ -150,7 +149,6 @@ const createYoutubePlaylist = async (accessToken) => {
                 'Authorization': `Bearer ${accessToken}`
             })
         });
-        // CKYTODO: Handle for 403 quote exceeded
 
         const data = await response.json()
         const playlistId = data.id;
@@ -192,7 +190,6 @@ const addToYoutubePlaylist = async (accessToken, playlistId, youtubeVideoId) => 
                 'Authorization': `Bearer ${accessToken}`
             })
         });
-        // CKYTODO: Handle for 403 quote exceeded
         console.log("Added this video to the playlist:", youtubeVideoId);
     } catch {
         console.log("Error:", error);
@@ -211,7 +208,7 @@ const convert = async () => {
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
 
     // Ensure the search query contains the exact keywords
-    searchQueries = songTitles.map(title => `"${title} (Official Video)"`); //CKYTODO: Try without quotes
+    searchQueries = songTitles.map(title => `${title} Official Video`);
     console.log("Youtube Search Queries:", searchQueries)
 
     await gapi.load('client', youtubeSearch);
