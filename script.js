@@ -1,8 +1,8 @@
 // API Credentials
-const spotifyClientId = "123";
-const spotifyClientSecret = "123";
-const youtubeApiKey = "123";
-const youtubeClientId = "123";
+const youtubeClientId = "shhhhhh";
+const spotifyClientId = "shhhhhh";
+const spotifyClientSecret = "shhhhhh";
+const youtubeApiKey = "shhhhhh";
 
 const enableConvertButton = (isEnabled) => {
     const convertButton = document.getElementById("convert-button");
@@ -43,6 +43,7 @@ const getSpotifyToken = async () => {
 const getSpotifyPlaylist = async (token, playlistUrl) => {
     playlistUrl = playlistUrl.slice(-1) === '/' ? playlistUrl.slice(0, -1) : playlistUrl;
     const playlistId = playlistUrl.substring(playlistUrl.lastIndexOf('/') + 1);
+    let songTitles = []
 
     try {
         const url = `https://api.spotify.com/v1/playlists/${playlistId}`;
@@ -53,17 +54,20 @@ const getSpotifyPlaylist = async (token, playlistUrl) => {
             })
         });
         const data = await response.json();
-        const tracks = data.tracks.items;
-        const songTitles = tracks.map((item) => {
-            const mainArtist = item.track.artists[0].name;
-            const trackItem = item.track.name;
-            return `${mainArtist} - ${trackItem}`;
-        });
-        return songTitles;
+        if (data.error && data.error.status === 404) {
+            alert("Unable to find Spotify playlist - please check it is public");
+        } else {
+            const tracks = data.tracks.items;
+            songTitles = tracks.map((item) => {
+                const mainArtist = item.track.artists[0].name;
+                const trackItem = item.track.name;
+                return `${mainArtist} - ${trackItem}`;
+            });
+        }
     } catch (error) {
         console.log(error);
-        return null;
     }
+    return songTitles;
 }
 
 // Youtube API
@@ -175,7 +179,7 @@ const addVideoListToYoutubePlaylist = async (accessToken, playlistId, videoIds) 
 const addToYoutubePlaylist = async (accessToken, playlistId, youtubeVideoId) => {
     const url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet"
     try {
-        await fetch(url, {
+        const response = await fetch(url, {
             method: 'POST',
             body: JSON.stringify({
                 "snippet": {
@@ -207,13 +211,22 @@ const convert = async () => {
     const accessToken = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
 
-    // Ensure the search query contains the exact keywords
-    searchQueries = songTitles.map(title => `${title} Official Video`);
-    console.log("Youtube Search Queries:", searchQueries)
+    if (songTitles.length == 0) {
+        enableConvertButton(true);
+    } else {
+        // Ensure the search query contains the exact keywords
+        searchQueries = songTitles.map(title => `${title} Official Video`);
+        console.log("Youtube Search Queries:", searchQueries)
 
-    await gapi.load('client', youtubeSearch);
-    console.log("Found Video IDs:", videoIds);
-    await googleIdClient.requestAccessToken();
+        await gapi.load('client', youtubeSearch);
+        console.log("Found Video IDs:", videoIds);
+        if (videoIds.length === 0) {
+            enableConvertButton(true);
+            showYoutubePlaylistUrl(true, null);
+        } else {
+            await googleIdClient.requestAccessToken();
+        }
+    }
 }
 
 convertButton.addEventListener("click", convert);

@@ -5,13 +5,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <Title>Spotify to Youtube Playlist</Title>
         <link rel="stylesheet" href="./styles.css"/>
+        <link rel="stylesheet" href="./mediaqueries.css"/>
     </head>
     <body>
-        <label for="spotify-playlist-url" class="spotify-text">Spotify Playlist URL</label>
+        <div class="url-title">
+            <img class="logos" src="./assets/spotify-logo.png" alt="Spotify Logo"/>
+            <label for="spotify-playlist-url" class="spotify-text">Spotify Playlist URL</label>
+        </div>
         <input type="url" id="spotify-playlist-url" />
         <button type="submit" id="convert-button">Convert</button>
         <div id="youtube-playlist-result">
-            <span class="youtube-text">Youtube Playlist URL</span>
+            <div class="url-title">
+                <img class="logos" src="./assets/youtube-logo.png" alt="YouTube Logo"/>
+                <span class="youtube-text">YouTube Playlist URL</span>
+            </div>
             <a id="youtube-playlist-url" target="_blank" href=""></a>
         <div>
         <script src="https://apis.google.com/js/api.js"></script>

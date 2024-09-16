@@ -25,6 +25,10 @@ body {
     gap: 1rem;
 }
 
+.logos {
+    max-width: 2rem;
+}
+
 .spotify-text {
     font-size: 1.6rem;
     color: var(--spotify-color);
@@ -33,6 +37,11 @@ body {
 .youtube-text {
     font-size: 1.4rem;
     color: var(--youtube-color);
+}
+
+.url-title {
+    display: flex;
+    gap: 0.5rem;
 }
 
 #spotify-playlist-url {
