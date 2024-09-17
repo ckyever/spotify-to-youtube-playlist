@@ -1,8 +1,4 @@
-// API Credentials
-const youtubeClientId = "shhhhhh";
-const spotifyClientId = "shhhhhh";
-const spotifyClientSecret = "shhhhhh";
-const youtubeApiKey = "shhhhhh";
+import {YOUTUBE_CLIENT_ID, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, YOUTUBE_API_KEY} from './config.js';
 
 const enableConvertButton = (isEnabled) => {
     const convertButton = document.getElementById("convert-button");
@@ -21,7 +17,7 @@ const enableConvertButton = (isEnabled) => {
 // Spotify API
 const getSpotifyToken = async () => {
     const url = "https://accounts.spotify.com/api/token";
-    const requestBody = `grant_type=client_credentials&client_id=${spotifyClientId}&client_secret=${spotifyClientSecret}`;
+    const requestBody = `grant_type=client_credentials&client_id=${SPOTIFY_CLIENT_ID}&client_secret=${SPOTIFY_CLIENT_SECRET}`;
 
     try {
         const response = await fetch(url, {
@@ -78,7 +74,7 @@ const youtubeSearch = () => {
     searchQueries.forEach(query => {
         gapi.client.init({
             'part': ['snippet'],
-            'apiKey': youtubeApiKey,
+            'apiKey': YOUTUBE_API_KEY,
             'discoveryDocs': ['https://youtube.googleapis.com/$discovery/rest?version=v3']
         }).then(function() {
             return gapi.client.youtube.search.list({
@@ -96,7 +92,7 @@ const youtubeSearch = () => {
 }
 
 const googleIdClient = google.accounts.oauth2.initTokenClient({
-    client_id: youtubeClientId,
+    client_id: YOUTUBE_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/youtube',
     ux_mode: 'popup',
     callback: (response) => {
