@@ -219,13 +219,16 @@ const convert = async () => {
         console.log("Youtube Search Queries:", searchQueries)
 
         await gapi.load('client', youtubeSearch);
-        console.log("Found Video IDs:", videoIds);
-        if (videoIds.length === 0) {
-            enableConvertButton(true);
-            showYoutubePlaylistUrl(true, null);
-        } else {
-            await googleIdClient.requestAccessToken();
-        }
+        await googleIdClient.requestAccessToken();
+
+        // CKYTODO: The below code does not work since videoIds may not be populated at this point
+        // console.log("Found Video IDs:", videoIds);
+        // if (videoIds.length === 0) {
+        //     enableConvertButton(true);
+        //     showYoutubePlaylistUrl(true, null);
+        // } else {
+        //     await googleIdClient.requestAccessToken();
+        // }
     }
 }
 
