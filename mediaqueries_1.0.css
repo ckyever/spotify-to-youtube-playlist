@@ -1,0 +1,8 @@
+@media screen and (max-width: 850px) {
+    html {
+        font-size: 0.6rem;
+    }
+    #spotify-playlist-url {
+        width: 80%;
+    }
+}
