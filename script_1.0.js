@@ -175,7 +175,7 @@ const addVideoListToYoutubePlaylist = async (accessToken, playlistId, videoIds) 
 const addToYoutubePlaylist = async (accessToken, playlistId, youtubeVideoId) => {
     const url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet"
     try {
-        const response = await fetch(url, {
+        await fetch(url, {
             method: 'POST',
             body: JSON.stringify({
                 "snippet": {
@@ -201,9 +201,16 @@ const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
+    if (spotifyPlaylistUrlInput.value.length == 0) {
+        alert("Please enter a URL");
+        return
+    }
+
     enableConvertButton(false);
     showYoutubePlaylistUrl(false, null);
+
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
+    // CKYTODO: Verify spotify URL is valid
     const accessToken = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
 
