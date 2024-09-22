@@ -201,6 +201,7 @@ const spotifyPlaylistUrlInput = document.getElementById("spotify-playlist-url");
 const convertButton = document.getElementById("convert-button");
 
 const convert = async () => {
+    // CKYTODO: Clicking convert after immediately generating a youtube playlist, will double up on the videos for the new playlist
     if (spotifyPlaylistUrlInput.value.length == 0) {
         alert("Please enter a URL");
         return
