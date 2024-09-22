@@ -50,7 +50,7 @@ const getSpotifyPlaylist = async (token, playlistUrl) => {
             })
         });
         const data = await response.json();
-        if (data.error && data.error.status === 404) {
+        if (data.error) {
             alert("Unable to find Spotify playlist - please check it is public");
         } else {
             const tracks = data.tracks.items;
@@ -210,7 +210,6 @@ const convert = async () => {
     showYoutubePlaylistUrl(false, null);
 
     const spotifyUrl = document.getElementById('spotify-playlist-url').value;
-    // CKYTODO: Verify spotify URL is valid
     const accessToken = await getSpotifyToken(); 
     const songTitles = await getSpotifyPlaylist(accessToken, spotifyUrl);
 
